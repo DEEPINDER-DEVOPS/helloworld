@@ -3,6 +3,6 @@ get-process -computername $tag1 | Group-Object -Property ProcessName | Format-Ta
 get-process -IncludeUserName chrome | Where-Object {$_.WorkingSet -gt 2MB} | Group-Object -Property ProcessName | Format-Table Name, @{n='Mem (KB)';e={'{0:N0}' -f (($_.Group|Measure-Object WorkingSet -Sum).Sum / 1KB)};a='right'} -AutoSize
 
 
-PS C:\WINDOWS\system32> Get-WMIObject -ComputerName vacuatollpa4v -Class Win32_Process -Filter "Name='Atoll.exe'" | Where-Object {$_.WS -gt 2GB} |Group-Object -Property | select WS,name,@{n='owner';e={$_.getowner().user}}
+PS C:\WINDOWS\system32> Get-WMIObject -ComputerName [CN] -Class Win32_Process -Filter "Name='[PC]'" | Where-Object {$_.WS -gt 2GB} |Group-Object -Property | select WS,name,@{n='owner';e={$_.getowner().user}}
 
-PS C:\WINDOWS\system32> Get-WMIObject -ComputerName vacuatollpa4v -Class Win32_Process -Filter "Name='Atoll.exe'" | Where-Object {$_.WS -gt 2GB} | Format-Table name,@{n='owner';e={$_.getowner().user}}, @{n='Mem (KB)';e={'{0:N0}' -f (($_.Group|Measure-Object WS -Sum).Sum / 1KB)};a='right'} -AutoSize
+PS C:\WINDOWS\system32> Get-WMIObject -ComputerName [CN] -Class Win32_Process -Filter "Name='[PC]'" | Where-Object {$_.WS -gt 2GB} | Format-Table name,@{n='owner';e={$_.getowner().user}}, @{n='Mem (KB)';e={'{0:N0}' -f (($_.Group|Measure-Object WS -Sum).Sum / 1KB)};a='right'} -AutoSize
