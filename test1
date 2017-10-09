@@ -15,3 +15,19 @@ $Processes = Get-WMIObject -Class Win32_Process -Filter "Name='MicrosoftEdgeCP.e
      $ProcArray += "" | select $prop
  }
  $ProcArray |Group-Object Owner, Name |sort -Descending Memory | select Count,Name,@{n='Memory usage(Total)';e={"$(($_.Memory).ToString('N0')) Kb"}}
+
+
+
+$ProcArray = @()
+$Processes = get-process | Group-Object -Property ProcessName
+foreach($Process in $Processes)
+{
+    $prop = @(
+            @{n='Count';e={$Process.Count}}
+            @{n='Owner';e={(Get-WmiObject win32_process -Filter "name=$Process.Name").getowner()}}
+            @{n='Name';e={$Process.Name}}
+            @{n='Memory';e={($Process.Group|Measure WorkingSet -Sum).Sum}}
+            )
+    $ProcArray += "" | select $prop  
+}
+$ProcArray | sort -Descending Memory | select Owner,Name,@{n='Memory usage(Total)';e={"$(($_.Memory).ToString('N0')) Kb"}}
