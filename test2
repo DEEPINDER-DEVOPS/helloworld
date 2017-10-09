@@ -1,0 +1,14 @@
+$ProcArray = @()
+$Pr = Get-WMIObject -ComputerName vacuatollpa4v -Class Win32_Process -Filter "Name='Atoll.exe'" | Where-Object {$_.WS -gt 2GB}
+foreach($S in $SID)
+(
+$Count=$Process.Count
+$Owner=($Pr).getowner().user 
+$Memory=(( $Pr.WS | Measure-Object -sum).sum/1GB)
+#,@{n='Memory usage(Total)';e={"$(($_.Mem).ToString('N0')) Kb"}}
+$Memory=(( $Pr.WS | Measure-Object -sum).sum/1GB)
+$f ="{0:N2}" -f $memory
+echo "Memory" $f
+
+ echo "Count" $Count
+ echo "Owner" $Owner
