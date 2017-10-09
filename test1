@@ -1,1 +1,17 @@
 Get-WMIObject -Class Win32_Process -Filter "Name='Atoll.exe'" | Where-Object {$_.WS -gt 1MB} | Format-Table name,@{n='owner';e={$_.getowner().user}}, @{n='Mem (MB)';e={"{0:N2}" -f ($_.WS/1MB)}} -AutoSize
+
+
+
+$ProcArray = @()
+$Processes = Get-WMIObject -Class Win32_Process -Filter "Name='MicrosoftEdgeCP.exe'"
+ foreach($WMIObject in $Processes)
+ {
+     $prop = @(
+             @{n='Count';e={$WMIObject.Count}}
+             @{n='Owner';e={$WMIObject.getowner().user}}
+             @{n='Name';e={$WMIObject.Name}}
+             @{n='Memory';e={($WMIObject.Group|Measure WS -Sum).Sum/1MB}}
+             )
+     $ProcArray += "" | select $prop
+ }
+ $ProcArray |Group-Object Owner, Name |sort -Descending Memory | select Count,Name,@{n='Memory usage(Total)';e={"$(($_.Memory).ToString('N0')) Kb"}}
