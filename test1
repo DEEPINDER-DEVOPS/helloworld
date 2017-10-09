@@ -1,0 +1,1 @@
+Get-WMIObject -Class Win32_Process -Filter "Name='Atoll.exe'" | Where-Object {$_.WS -gt 1MB} | Format-Table name,@{n='owner';e={$_.getowner().user}}, @{n='Mem (MB)';e={"{0:N2}" -f ($_.WS/1MB)}} -AutoSize
