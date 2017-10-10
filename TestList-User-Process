@@ -1,0 +1,25 @@
+$ProcArray = @()
+$Processes = Get-WMIObject -Class Win32_Process -Filter "Name='Conhost.exe'"
+ foreach($WMIObject in $Processes)
+ {
+     $prop = @(
+             @{n='Owner';e={$WMIObject.getowner().user}}
+             @{n='Name';e={$WMIObject.Name}}
+             @{n='Memory';e={$WMIObject.WS}}
+             )
+     $ProcArray += "" | select $prop
+ }
+$finalArray = @()
+$fprocess =  $ProcArray | Group-Object Owner, Name
+echo $fprocess
+ foreach($process in $fprocess)
+ {
+     $final = @(
+              @{n='Count';e={$process.Count}}
+              @{n='Owner';e={$process.Owner}}
+              @{n='Name';e={$process.Name}}
+              @{n='Memory';e={($process.Group|Measure Memory -Sum).Sum/1MB}}
+               )   
+     $finalArray += "" | select $final
+ }
+ $finalArray|select Count,Owner,Name,@{n='Memory usage(Total)';e={"$(($_.Memory).ToString('N0')) MB"}}
