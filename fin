@@ -1,0 +1,47 @@
+#Import-Module -Name ActiveDirectory
+#$prodVMs = Get-ADComputer -filter { Name -like 'vacuatollpa39v' } 
+#ForEach ($vm in $prodVMs)  
+#Server list details   
+$Path="C:\Windows\System32\WindowsPowerShell\v1.0\Examples\test"
+$serverList = "$Path\serverlist.txt";   
+$LogFile = "MemoryLog_" + (get-date -Format "MM-dd-yyyy") + ".txt"
+function Get-TimeStamp {
+    
+    return "[{0:MM/dd/yy} {0:HH:mm:ss}]" -f (Get-Date)
+    
+}
+Write-Output "Running script at: $(Get-TimeStamp)" | Out-file $LogFile -append
+foreach($prodVMs in get-content $serverList)  
+{
+	$ProcArray = @()
+	$Processes = Get-WMIObject -Class Win32_Process -ComputerName $prodVMs -Filter "Name='Atoll.exe'" | Where-Object {$_.WS -gt 10GB} 
+	foreach($WMIObject in $Processes)
+		{
+		$prop = @(
+             @{n='Owner';e={$WMIObject.getowner().user}}
+             @{n='Name';e={$WMIObject.Name}}
+             @{n='Memory';e={$WMIObject.WS}}
+             @{n='Computer';e={$WMIObject.CSName}}
+             )
+		$ProcArray += "" | select $prop
+		}
+	$finalArray = @()
+	$fprocess =  $ProcArray | Group-Object Owner,Name, Computer
+	#echo $fprocess
+	foreach($process in $fprocess)
+	{
+		$final = @(
+              @{n='Count';e={$process.Count}}
+              @{n='Owner';e={$process.Owner}}
+              @{n='Name';e={$process.Name}}
+              @{n='Server';e={$process.Computer}}
+              @{n='Memory';e={($process.Group|Measure Memory -Sum).Sum/1GB}}
+               )   
+		$finalArray += "" | select $final
+	}
+	$finalArray|select Count,Owner,Name,@{n='Memory(Total)';e={"$(($_.Memory).ToString('N2')) GB"}} | Out-File $LogFile -Append -Force
+}
+if(Test-Path -path $LogFile)
+{
+    echo "warning"
+}
